@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interesting Math Puzzles — Ojas Jain</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<p class="topnav"><a href="index.html">Ojas Jain</a> · Math Puzzles</p>
+
+<h1>Interesting Math Puzzles</h1>
+
+<p>A growing collection of puzzles I've enjoyed. Solutions are hidden — click
+to reveal.</p>
+
+
+<h2>1. Self-avoiding paths on a grid</h2>
+
+<p>A token sits at the origin of an infinite square lattice. In one step it
+may move one unit <strong>up</strong>, <strong>down</strong>, or
+<strong>right</strong> — never left. The walk must be
+<em>self-avoiding</em>: the token may never occupy a lattice point it has
+already visited.</p>
+
+<p>For a walk of exactly <span class="fml">N</span> steps, how many distinct
+paths are possible?</p>
+
+<figure class="diagram">
+<svg viewBox="0 0 185 150" width="185" height="150" role="img" aria-label="Allowed moves: up, down, right; left is forbidden">
+  <defs>
+    <marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#111"/>
+    </marker>
+    <marker id="ahx" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#bbb"/>
+    </marker>
+  </defs>
+  <circle cx="95" cy="82" r="4" fill="#111"/>
+  <line x1="95" y1="77" x2="95" y2="32" stroke="#111" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="101" y="40" font-size="11" fill="#111">up</text>
+  <line x1="95" y1="87" x2="95" y2="132" stroke="#111" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="101" y="134" font-size="11" fill="#111">down</text>
+  <line x1="100" y1="82" x2="155" y2="82" stroke="#111" stroke-width="2" marker-end="url(#ah)"/>
+  <text x="120" y="75" font-size="11" fill="#111">right</text>
+  <line x1="90" y1="82" x2="40" y2="82" stroke="#bbb" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#ahx)"/>
+  <text x="26" y="99" font-size="10" fill="#bbb">left ✗</text>
+</svg>
+<figcaption>The three allowed moves. Left is never permitted.</figcaption>
+</figure>
+
+<figure class="diagram">
+<svg viewBox="0 0 230 178" width="230" height="178" role="img" aria-label="A sample self-avoiding path: R, U, U, R, R, D">
+  <defs>
+    <marker id="ah2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#111"/>
+    </marker>
+  </defs>
+  <g fill="#ccc">
+    <circle cx="40" cy="150" r="2"/><circle cx="76" cy="150" r="2"/><circle cx="112" cy="150" r="2"/><circle cx="148" cy="150" r="2"/><circle cx="184" cy="150" r="2"/>
+    <circle cx="40" cy="114" r="2"/><circle cx="76" cy="114" r="2"/><circle cx="112" cy="114" r="2"/><circle cx="148" cy="114" r="2"/><circle cx="184" cy="114" r="2"/>
+    <circle cx="40" cy="78" r="2"/><circle cx="76" cy="78" r="2"/><circle cx="112" cy="78" r="2"/><circle cx="148" cy="78" r="2"/><circle cx="184" cy="78" r="2"/>
+    <circle cx="40" cy="42" r="2"/><circle cx="76" cy="42" r="2"/><circle cx="112" cy="42" r="2"/><circle cx="148" cy="42" r="2"/><circle cx="184" cy="42" r="2"/>
+  </g>
+  <polyline points="40,150 76,150 76,114 76,78 112,78 148,78 148,114" fill="none" stroke="#111" stroke-width="2" stroke-linejoin="round" marker-end="url(#ah2)"/>
+  <circle cx="40" cy="150" r="4" fill="#1a4ba0"/>
+  <text x="28" y="168" font-size="10" fill="#1a4ba0">start</text>
+</svg>
+<figcaption>A valid 6-step path: right, up, up, right, right, down.</figcaption>
+</figure>
+
+<details>
+  <summary>Show solution</summary>
+  <div class="solution">
+    <p>Because the token can move right but never left, its
+    <em>x</em>-coordinate never decreases. Once it leaves a column (a vertical
+    line <span class="fml">x = c</span>) by stepping right, it can never come
+    back to that column. So the path can only ever revisit a point
+    <em>within a single column</em> — among a run of vertical (up/down) moves
+    at the same <em>x</em>.</p>
+
+    <p>Within a column, the token revisits a point exactly when it reverses
+    vertical direction, and a reversal always appears as two consecutive moves
+    <span class="fml">UD</span> or <span class="fml">DU</span>. So a path is
+    self-avoiding <strong>if and only if</strong> its move-string over
+    <span class="fml">{U, D, R}</span> never contains
+    <span class="fml">UD</span> or <span class="fml">DU</span>.</p>
+
+    <p>Now just count length-<span class="fml">N</span> strings over
+    <span class="fml">{U, D, R}</span> with no U next to a D. Grouping by the
+    last move:</p>
+    <ul>
+      <li>after <span class="fml">R</span> you may place R, U, or D;</li>
+      <li>after <span class="fml">U</span> you may place R or U;</li>
+      <li>after <span class="fml">D</span> you may place R or D.</li>
+    </ul>
+
+    <p>Letting <span class="fml">a<sub>N</sub></span> be the total count, this
+    gives the recurrence</p>
+    <p class="fml">a<sub>N</sub> = 2·a<sub>N−1</sub> + a<sub>N−2</sub>,
+    &nbsp; a<sub>1</sub> = 3, &nbsp; a<sub>2</sub> = 7,</p>
+    <p>producing <span class="fml">3, 7, 17, 41, 99, 239, …</span> — and in
+    closed form</p>
+    <p class="fml answer">a<sub>N</sub> = ½ · [ (1+√2)<sup>N+1</sup> +
+    (1−√2)<sup>N+1</sup> ].</p>
+    <p>These are the half-companion Pell numbers; the count grows by a factor
+    of <span class="fml">(1+√2) ≈ 2.414</span> per step.</p>
+  </div>
+</details>
+
+
+<h2>2. The circle through the second-nearest point</h2>
+
+<p>Five points are dropped independently and uniformly at random inside a unit
+disk (radius&nbsp;1, centred at <span class="fml">O</span>). Sort them by
+distance from the centre and draw the concentric circle that passes through
+the <strong>second-closest</strong> point. That circle contains exactly two of
+the five points — the closest one strictly inside, and the second-closest on
+its boundary.</p>
+
+<p>What is the <strong>expected area</strong> of this circle? (Loosely: the
+smallest circle centred at <span class="fml">O</span> that captures two of the
+points.)</p>
+
+<figure class="diagram">
+<svg viewBox="0 0 220 220" width="220" height="220" role="img" aria-label="Unit disk with five random points and the concentric circle through the second-nearest point">
+  <circle cx="110" cy="110" r="90" fill="none" stroke="#111" stroke-width="1.5"/>
+  <circle cx="110" cy="110" r="40" fill="#1a4ba0" fill-opacity="0.08" stroke="#1a4ba0" stroke-width="1.2" stroke-dasharray="4 3"/>
+  <line x1="110" y1="110" x2="82" y2="138" stroke="#1a4ba0" stroke-width="1"/>
+  <text x="86" y="128" font-size="10" fill="#1a4ba0">r</text>
+  <circle cx="110" cy="110" r="2" fill="#888"/>
+  <text x="114" y="107" font-size="10" fill="#888">O</text>
+  <circle cx="132" cy="96" r="3.5" fill="#111"/>
+  <circle cx="82" cy="138" r="3.5" fill="#111"/>
+  <circle cx="170" cy="150" r="3.5" fill="#111"/>
+  <circle cx="55" cy="65" r="3.5" fill="#111"/>
+  <circle cx="150" cy="185" r="3.5" fill="#111"/>
+</svg>
+<figcaption>The shaded concentric circle reaches the second-nearest point, so
+it holds exactly two of the five points.</figcaption>
+</figure>
+
+<details>
+  <summary>Show solution</summary>
+  <div class="solution">
+    <p>The trick is to change variables. For a single uniform point in the
+    unit disk, let <span class="fml">R</span> be its distance from the centre.
+    The chance of landing within radius <span class="fml">r</span> is the area
+    ratio <span class="fml">r²</span>, so
+    <span class="fml">P(R ≤ r) = r²</span> — which means
+    <span class="fml">R²</span> is uniform on <span class="fml">[0, 1]</span>.</p>
+
+    <p>The area of the concentric disk through a point at distance
+    <span class="fml">R</span> is <span class="fml">π R²</span>. So if we set
+    <span class="fml">U = R²</span>, then <span class="fml">area ⁄ π = U</span>
+    is <span class="fml">Uniform[0, 1]</span> — independently for each of the
+    five points.</p>
+
+    <p>We want the disk through the second-closest point, i.e. the
+    <em>second-smallest</em> of the five <span class="fml">U</span>'s. For
+    <span class="fml">n</span> i.i.d. <span class="fml">Uniform[0,1]</span>
+    values, the <span class="fml">k</span>-th smallest has expectation
+    <span class="fml">k ⁄ (n+1)</span>. With
+    <span class="fml">n = 5</span>, <span class="fml">k = 2</span>:</p>
+    <p class="fml">E[U<sub>(2)</sub>] = 2 ⁄ 6 = 1 ⁄ 3.</p>
+
+    <p>Therefore the expected area is</p>
+    <p class="fml answer">E[π R<sub>(2)</sub>²] = π · E[U<sub>(2)</sub>]
+    = π ⁄ 3 ≈ 1.047.</p>
+  </div>
+</details>
+
+
+<footer>
+  <span class="social">
+    <a href="mailto:ojas.jain.25072003@gmail.com" aria-label="Email"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" fill="currentColor"/></svg></a>
+    <a href="https://github.com/MaximusStupidus" aria-label="GitHub"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.014 2.898-.014 3.293 0 .322.216.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="currentColor"/></svg></a>
+    <a href="https://x.com/ozzajj" aria-label="X"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" fill="currentColor"/></svg></a>
+    <a href="https://www.linkedin.com/in/ojas-jain-iit" aria-label="LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z" fill="currentColor"/></svg></a>
+  </span>
+  <span class="visits" hidden><span class="visits-count"></span> visits</span>
+</footer>
+
+<script data-goatcounter="https://YOURCODE.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script>
+fetch('https://YOURCODE.goatcounter.com/counter/TOTAL.json')
+  .then(function (r) { return r.json(); })
+  .then(function (d) {
+    var el = document.querySelector('.visits');
+    if (!el) return;
+    el.querySelector('.visits-count').textContent = d.count;
+    el.hidden = false;
+  })
+  .catch(function () {});
+</script>
+
+</body>
+</html>
