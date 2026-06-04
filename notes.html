@@ -40,9 +40,8 @@ inline. No separate pages.]</p>
   <span class="visits" hidden><span class="visits-count"></span> visits</span>
 </footer>
 
-<script data-goatcounter="https://YOURCODE.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <script>
-fetch('https://YOURCODE.goatcounter.com/counter/TOTAL.json')
+fetch('https://ojas-visit-counter.ojas-lucifer.workers.dev/')
   .then(function (r) { return r.json(); })
   .then(function (d) {
     var el = document.querySelector('.visits');

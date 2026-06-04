@@ -41,24 +41,22 @@ the markup once and copy it across.
    </div>
    ```
 
-## Visitor counter (GoatCounter)
+## Visitor counter (self-hosted)
 
-The footer shows a live total visit count via [GoatCounter](https://www.goatcounter.com)
-(free, privacy-friendly, no cookies). To turn it on:
+The footer shows a live total visit count from our own backend — a tiny
+Cloudflare Worker + KV store, no third-party analytics. The Worker code and
+deploy steps live in [`counter/`](counter/).
 
-1. Sign up at [goatcounter.com](https://www.goatcounter.com) — pick a code, e.g.
-   `ojasjain`. Your stats URL becomes `https://ojasjain.goatcounter.com`.
-2. In the site files, find-and-replace every `YOURCODE` with your code.
-   It appears twice in each page (the tracking script + the count fetch),
-   in all the `.html` files including `_template-post.html`.
-3. In GoatCounter → Settings, enable **"Allow adding visitor counts to your
-   website"** so the live count can display.
+- **Endpoint:** `https://ojas-visit-counter.ojas-lucifer.workers.dev/`
+  (`GET /` increments and returns `{count}`, `GET /?peek=1` reads without
+  incrementing).
+- Each page's footer fetches it; the `.visits` span reveals itself once a
+  count comes back. If the fetch fails (offline, etc.) it just stays hidden.
+- To change/redeploy the Worker, see `counter/README.md`. To reset the count:
+  `cd counter && npx wrangler kv key put count 0 --binding=COUNTER --remote`.
 
-Notes:
-- The count only registers real hits once the site is on a live URL — it
-  won't count when you open the files locally.
-- Until you swap in a real code (or while offline), the count simply stays
-  hidden; nothing breaks.
+Note: the count only moves on a live URL — opening the files locally still
+fires the fetch, but you'll usually want to watch it on the deployed site.
 
 ## Contact form
 

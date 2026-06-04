@@ -7,4 +7,4 @@ compatibility_date = "2026-06-04"
 # then paste the printed id below (replacing PASTE_KV_NAMESPACE_ID_HERE).
 [[kv_namespaces]]
 binding = "COUNTER"
-id = "PASTE_KV_NAMESPACE_ID_HERE"
+id = "e0bf07b1296e4e38a3c057f27ff8896f"
