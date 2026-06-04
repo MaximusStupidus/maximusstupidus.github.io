@@ -1,0 +1,10 @@
+name = "ojas-visit-counter"
+main = "worker.js"
+compatibility_date = "2026-06-04"
+
+# KV namespace that stores the single "count" value.
+# Created with:  npx wrangler kv namespace create COUNTER
+# then paste the printed id below (replacing PASTE_KV_NAMESPACE_ID_HERE).
+[[kv_namespaces]]
+binding = "COUNTER"
+id = "PASTE_KV_NAMESPACE_ID_HERE"
