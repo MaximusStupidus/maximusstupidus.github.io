@@ -9,14 +9,13 @@ Montserrat. No build step, no dependencies, nothing to install.
 index.html          Homepage: name, intro, links to each section, contact
 projects.html       Projects
 cv.html             CV
-blog.html           List of blog posts (newest first)
+essays.html         List of essays (newest first)
 reading.html        Bookshelf
-notes.html          Short-form notes/links, all inline
 quotes.html         Favourite quotes
 puzzles.html        Interesting math puzzles (click-to-reveal solutions)
 contact.html        Contact + a mailto form
-posts/              One HTML file per blog post
-_template-post.html Copy this to start a new post
+posts/              One HTML file per essay
+_template-post.html Copy this to start a new essay
 favicon.svg         The tab icon (a black circle)
 style.css           The whole site's styling — edit here, changes everywhere
 ```
@@ -28,12 +27,12 @@ Open any `.html` file and replace the text in `[square brackets]`. The
 URLs. The footer is repeated on each page — update it everywhere, or change
 the markup once and copy it across.
 
-## Adding a blog post
+## Adding an essay
 
 1. Copy `_template-post.html` into `posts/`, e.g.
    `posts/2026-06-15-my-essay.html`.
 2. Fill in the title, date, and paragraphs.
-3. Add one line near the top of the list in `blog.html`:
+3. Add one line near the top of the list in `essays.html`:
    ```html
    <div class="entry">
      <a href="posts/2026-06-15-my-essay.html">My essay title</a>
