@@ -192,3 +192,12 @@ figcaption { color: #888; font-size: 12px; margin-top: 6px; }
 
 /* Inline math-ish monospace for small formulae */
 .fml { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-size: 14px; }
+
+/* Top navigation buttons (on every inner page) */
+.nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 36px; }
+.nav a {
+  font-size: 13px; color: #444; text-decoration: none;
+  padding: 4px 11px; border: 1px solid #e4e4dd; border-radius: 6px;
+  background: #fff; line-height: 1.5;
+}
+.nav a:hover { color: #111; border-color: #b9b9b0; background: #fafaf7; }
