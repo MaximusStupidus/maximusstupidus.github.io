@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Refining the Transformer — Ojas Jain</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css?v=3">
+</head>
+<body>
+
+<nav class="nav">
+<a href="../index.html">Home</a><a href="../projects.html">Projects</a><a href="../cv.html">CV</a><a href="../writings.html">Writings</a><a href="../reading.html">Reading</a><a href="../quotes.html">Quotes</a><a href="../puzzles.html">Puzzles</a><a href="../contact.html">Contact</a>
+</nav>
+
+<article>
+<h1>Refining the Transformer</h1>
+<p class="post-date">June 25, 2026 · CME295, Lecture 2</p>
+
+<h3>00:00:00–00:09:30 · Recap</h3>
+<p><strong>Attention Map</strong> tries to represent the value of each dot product of Query and Key, to show the relative importance of words in a sentence.</p>
+<p><strong>Suggested —</strong> read <em>Attention Is All You Need</em>.</p>
+
+<h3>00:09:30 · Position embeddings</h3>
+<p>In a transformer, because we look at each word surrounding a particular token, direct links lose the positional information that was present in sequential RNNs. Hence the idea is to add a learned, position-specific embedding to each token vector.</p>
+<p><strong>Note —</strong> the positional embeddings are learnt.</p>
+<p>There is also a way of hardcoding position embeddings. It's predetermined via a formula. The authors chose a formulation based on sines and cosines in the OG paper. For every index, compute the corresponding values from the formulae in the paper.</p>
+<figure class="diagram">
+  <img class="shot" src="../images/l2-pe-formula.png" alt="Sine/cosine positional encoding formula: PE_{m,2i}=sin(w_i m), PE_{m,2i+1}=cos(w_i m)">
+  <figcaption>The hardcoded sine/cosine positional encoding, computed per index.</figcaption>
+</figure>
+<figure class="diagram">
+  <img class="shot" src="../images/l2-pe-mn.png" alt="Positional encodings computed for two positions m and n">
+  <figcaption>The same formula evaluated at two positions, m and n.</figcaption>
+</figure>
+<figure class="diagram">
+  <img class="shot" src="../images/l2-pe-values.png" alt="Heatmaps: value of the embeddings, and similarity between positions">
+  <figcaption>Left: the value of the embeddings. Right: similarity between positions.</figcaption>
+</figure>
+<p><strong>Core idea —</strong> words that are closer together are likely to be more relevant.</p>
+<p><strong>Benefits —</strong> this can extend to any sequence length.</p>
+<p>In 2025, this is still being used… kind of.</p>
+
+<h3>From Absolute to Relative Positional Information</h3>
+<p>Within the attention layer, we care about relative position. Hence the idea is to change the attention layer instead. This can be done by tweaking the attention formula: add a bias to the query-key scores inside the softmax. "Some tokens are supposed to be more similar compared to others."</p>
+<figure class="diagram">
+  <img class="shot" src="../images/l2-t5-bias.png" alt="Adding a bias term to query-key scores inside the softmax; T5 bias is learned per head">
+  <figcaption>The T5 approach: a bias added to the query-key scores inside the softmax, learned per head.</figcaption>
+</figure>
+<p>The T5 paper introduces this by learning the bias term per head. Bucketize all the "m − n" quantities into some buckets, and have the model learn these quantities, which are then injected into the softmax.</p>
+<p>There are other methods. <strong>ALiBi</strong> — from the "train short, test long" paper — where the bias is linear, deterministic and not bounded, so they got a formula for it. (ALiBi = Attention with Linear Biases.)</p>
+<figure class="diagram">
+  <img class="shot" src="../images/l2-alibi.png" alt="ALiBi: bias is linear, deterministic and not bounded, bias(m,n) = mu * (n - m)">
+  <figcaption>ALiBi: a linear, deterministic, unbounded bias.</figcaption>
+</figure>
+<p>Today, most models use rotation of the query and key vectors by some angle, with a rotation matrix.</p>
+
+<h3>00:37:30 · RoPE — Rotary Position Embeddings</h3>
+<p>The idea is to rotate the query and key vectors with a rotation matrix.</p>
+<p>As |m − n| becomes large, the relative upper bound of the attention value decays, which solves the problem of nearer tokens having more weight in attention.</p>
+<figure class="diagram">
+  <img class="shot" src="../images/l2-attention-decay.png" alt="Relative upper bound of attention A(q_m k_n^T) decaying as |m-n| grows">
+  <figcaption>The relative upper bound of attention decays as |m − n| grows.</figcaption>
+</figure>
+
+<h3>00:44:30 · Layer Normalization</h3>
+<p>This helps with training stability and was used in the OG paper. It basically requires the model to learn parameters — γ (gamma) and β (beta):</p>
+<p class="fml">LN(x) = γ · x̂ + β,&nbsp; with&nbsp; x̂ = (x − μ) / √(σ² + ε),&nbsp; μ = (1/d) Σ<sub>i=1</sub><sup>d</sup> x<sub>i</sub>,&nbsp; σ² = (1/d) Σ<sub>i=1</sub><sup>d</sup> (x<sub>i</sub> − μ)²</p>
+<p>This helps with stability and convergence time.</p>
+<p>In today's time, there are different kinds of layer normalization. There is <strong>Post-Norm</strong> and <strong>Pre-Norm</strong> normalization.</p>
+<p>In Post-Norm, the output = <span class="fml">LayerNorm(x + SubLayer(x))</span>, and it's done after the residual connection.</p>
+<figure class="diagram">
+  <img class="shot" src="../images/l2-postnorm.png" alt="Post-Norm: layer norm applied after the residual connection">
+  <figcaption>Post-Norm: layer norm after the residual connection.</figcaption>
+</figure>
+<p>In Pre-Norm, the output = <span class="fml">x + SubLayer(LayerNorm(x))</span>, and it's done before the residual connection.</p>
+<figure class="diagram">
+  <img class="shot" src="../images/l2-prenorm.png" alt="Pre-Norm: layer norm applied before the residual connection">
+  <figcaption>Pre-Norm: layer norm before the residual connection.</figcaption>
+</figure>
+<p>Nowadays, people use <strong>RMSNorm</strong> (Root Mean Square Norm), typically as Pre-Norm + RMSNorm:</p>
+<p class="fml">γ · x̂ + β&nbsp; →&nbsp; γ · x / RMS(x)&nbsp;&nbsp; (so only γ is learnt)</p>
+<p>Intuition behind normalising → sometimes the activation has extreme values in some part or another, and if they vary too much, the model has trouble learning. Hence normalising helps by bringing the components of the activation to a range that isn't too far off in some direction. <strong>Internal Covariate Shift</strong> is the name of this phenomenon.</p>
+<p>Difference between Batch Normalization &amp; RMSNorm → BN is normalization across the other dimensions of the batch. Batch norm depends on the batch and can introduce some differences between training and inference.</p>
+
+<h3>00:50:40 · Attention Approximation</h3>
+<p><strong>Longformer (2020)</strong> → long-document transformer → restricting the window to let each token interact only with its neighbourhood, and not every other token.</p>
+<p>Some clever tricks like tiling are used here. They do not involve the entire operation of computing attention — <span class="fml">softmax(QK<sup>T</sup>/√d)</span>.</p>
+<p>The problem with normal attention is that it is O(n²), which is basically the term all computer-science nerds are terrified of.</p>
+<p>This is called <strong>SWA → Sliding Window Attention</strong>. People have local attention in some layers and global attention in others. Variations include interleaving local and global attention layers, and optimizing performance. Example: Mistral 7B has SWA. It's similar to the receptive field in computer vision.</p>
+<p><strong>Idea —</strong> don't have one projection matrix per head; share them across heads. To share attention heads, the basic idea is to share key/value heads within a group of queries.</p>
+<figure class="diagram">
+  <img class="shot" src="../images/l2-kv-grouping.png" alt="Grouping of Keys and Values: G groups of query heads sharing K and V projections">
+  <figcaption>Sharing K and V projections within a group of query heads.</figcaption>
+</figure>
+<p>Keys and Values are usually grouped, but not the Query. Intuitively, the query is basically wondering whether something is similar to something else. Another reason: when you decode, you perform attention between the current word and all the words before it. The Keys and Values come up again and again via the <strong>KV Cache</strong>, which saves the values of the Keys and Values. We don't want it to become too big, hence we share projection matrices across heads.</p>
+<figure class="diagram">
+  <img class="shot" src="../images/l2-attention-types.png" alt="MQA, GQA and MHA: from one shared K/V group, to g groups, to one per head">
+  <figcaption>From left to right: MQA (one shared group), GQA (g groups), MHA (one per head).</figcaption>
+</figure>
+<ul>
+  <li><strong>G = 1 → Multi-Query Attention (MQA).</strong> All h heads share the same projection matrices for V and K.</li>
+  <li><strong>1 &lt; G &lt; h → Group-Query Attention (GQA).</strong> We share g projection matrices for V and K, and there are groups of size h over g.</li>
+  <li><strong>G = h → Multi-Head Attention (MHA).</strong> Every head has its own query, key and value projection matrices.</li>
+</ul>
+<p><strong>Question — do we apply this to self-attention and cross-attention?</strong> → In today's models, we usually care about what is in the decoder and not the encoder. This typically comes into play for the masked self-attention in the decoder, but can be applied anywhere. Since we don't care a lot about the encoder (modern LLMs are decoder-only), we don't really use it in the encoder.</p>
+<p><strong>Question — how do you know which one to use?</strong> → Depends on how well it performs, latency, costs, how big the model is, how much you want to save on compute, how long your input is (short or long), etc. Most models usually have GQA.</p>
+
+<h3>01:03:00 · Architectures of modern Transformers</h3>
+<p>The most popular one is the encoder-decoder text-to-text transformer (T5, mT5 (multilingual), ByT5 (a tokenizer-free method operating at the byte level, with a smaller vocabulary size — 2<sup>8</sup>; every character is 2 bytes)).</p>
+<p>The OG transformer did next-token prediction for the training task, but the T5 family operated on the span-corruption task.</p>
+<p><strong>Span Corruption</strong> → one or multiple tokens are blanked or missing in the sentence that is input to the encoder. N is the number of spans that are corrupted. The T5 family called them <strong>sentinel tokens</strong> — each represents a span of corrupted tokens. The decoder's job is to find each of the spans in series.</p>
+<p>A <strong>teacher-forcing</strong> mechanism is used for training such models (input everything to the decoder and try to reconstruct everything at once).</p>
+<p>Another architecture is <strong>Encoder-Only</strong> → the projection of an embedding for class prediction (e.g. sentiment extraction). Examples are BERT, DistilBERT and RoBERTa.</p>
+<p>The final one is <strong>Decoder-only</strong>, which is essentially text-to-text. Examples are the GPT series.</p>
+
+<h3>01:11:30 · BERT Deep Dive</h3>
+<p><strong>BERT</strong> → Bidirectional Encoder Representations from Transformers.</p>
+<p>Why is this bidirectionality remarkable → from a given input, we are able to get output representations that have attended to everything, for each token. This is in contrast with <strong>MSA</strong> (Masked Self-Attention), which is not bidirectional but rather causal, as the mask makes every token attend to itself and every token before it. GPT is not truly bidirectional.</p>
+<p><strong>ELMo</strong> → Embeddings from Language Models: a bidirectional LSTM where you had multiple layers stacked on top of each other to build a bidirectional representation for each word. It was hard to scale because of its similarity to previous models, due to recurrence.</p>
+<p>ELMo &amp; BERT are Sesame Street characters, haha.</p>
+
+<h3>01:16:05 · BERT &amp; Encoder-only models</h3>
+<p>We keep only encoders and leverage the encoded embeddings.</p>
+<ul>
+  <li><strong>CLS</strong> → classification placeholder, which carries bidirectional information for the whole input.</li>
+  <li><strong>SEP</strong> → separator token, which aims at separating 2 sentences.</li>
+</ul>
+<p>The strategy for training is multi-staged for these types of models:</p>
+<ul>
+  <li><strong>Step 1:</strong> pretraining with proxy tasks (MLM — Masked Language Model, &amp; NSP — Next Sentence Prediction).</li>
+  <li><strong>Step 2:</strong> finetuning for a given end task.</li>
+</ul>
+<p><strong>Pros —</strong> finetuning does not need a lot of data and has good performance (sometimes exceeding SOTA).</p>
+<p><strong>Cons —</strong> it is not suited for a range of tasks (e.g. text generation), and fine-tuning is a required step.</p>
+<p><strong>Variants —</strong> RoBERTa, DistilBERT, ALBERT.</p>
+
+<h3>01:22:27 · BERT Architecture</h3>
+<figure class="diagram">
+  <img class="shot" src="../images/l2-bert-arch.png" alt="The original transformer (2017) next to BERT (2018), highlighting WordPiece + MLM/NSP and segment encoding">
+  <figcaption>The original transformer (2017) and BERT (2018) side by side.</figcaption>
+</figure>
+<p>BERT used a specific tokenizer called <strong>WordPiece</strong>, which is trained on a training set beforehand, with a vocabulary size of 30,000, and is great at detecting common particles.</p>
+<p>For the processing of NLP and MLM tasks:</p>
+<ul>
+  <li>We add the [CLS] token at the beginning of the input.</li>
+  <li>We separate consecutive segments with the [SEP] token, and put another one at the end.</li>
+  <li>We use a [MASK] to mask the inputs.</li>
+</ul>
+<p>The input embedding is a gigantic lookup table that learns an embedding for each word of the vocabulary. There is also a positional embedding here, which helps the network associate tokens with their position. The authors of the BERT paper used a hardcoded positional embedding — encodings are either learned or fixed with cosines and sines.</p>
+<p>The new idea here is the <strong>Segment Encoding</strong>, which is essentially a shared embedding for a segment. It was supposed to help with the NSP task, because it had features that could represent which sentence precedes the other, but it has been challenged publicly.</p>
+<p>Does every token in the same sentence have the same segment encoding? The answer is yes.</p>
+<p><strong>Encoder-only model</strong> — take the encoder part of the original transformers paper, and we have three sets of goals:</p>
+<ul>
+  <li>Represent input data with the features needed for NLP tasks.</li>
+  <li>Leverage the transformer's self-attention mechanism.</li>
+  <li>Use learned embeddings towards classification-oriented tasks.</li>
+</ul>
+
+<p><strong>Proxy Task: MLM.</strong> The basic idea is that 15% of input tokens in the input sentence are changed at random:</p>
+<ul>
+  <li>80% are masked,</li>
+  <li>10% are changed to a random word,</li>
+  <li>10% are unchanged.</li>
+</ul>
+<p>This MLM task is performed on a subset of tokens. The basic intuition is that when you need to predict a token, you need to know about its context. So we force the model to learn about what surrounds it, left and right. This is the bidirectional property of this architecture put into action. The benefits are that the network learns language modelling based on contextual information, and the regularisation reflects the probabilistic nature of language.</p>
+
+<p><strong>Proxy Task: NSP.</strong> The basic idea is that we pick two sentences from the training corpus:</p>
+<ul>
+  <li>50% of the time, they follow each other.</li>
+  <li>50% of the time, they do not follow each other.</li>
+</ul>
+<p>The task is to predict whether they follow each other. The benefits are that the network implicitly learns to detect useful contextual information, and it's an easy classification task that does not require labels.</p>
+
+<p>The notation in this paper is slightly different. Basically, what we called "N" in the original transformer paper is now called "L" for Layers; "H" is the dimension of our embeddings (was called d); and "A" is the number of attention heads (was called h).</p>
+<p>Also note that the BERT model has language-specific multilingual data, and the languages on which the model has been trained are specified. Usually on Hugging Face, you'll also find <em>cased</em> or <em>uncased</em> types of models, which specify whether the inputs are converted to lower case or not.</p>
+
+<p>There are some takeaways from understanding BERT's architecture. The benefits are:</p>
+<ul>
+  <li>State-of-the-art results.</li>
+  <li>True contextual representation of words.</li>
+  <li>Adaptable to many classification tasks.</li>
+</ul>
+<p>Its applications are widely used in the industry for anything related to encoding. There are some limitations as well:</p>
+<ul>
+  <li>Context window size is limited.</li>
+  <li>Computationally expensive and hard to sell for low-latency or cost-sensitive applications.</li>
+  <li>The training paradigm is complex, as MLM and NSP plus fine-tuning are all required.</li>
+  <li>Distillation.</li>
+</ul>
+
+<h2>A closing note: Distillation, DistilBERT &amp; RoBERTa</h2>
+<p>BERT is powerful but heavy, so a lot of follow-up work was about making it smaller, faster, or simply better-trained.</p>
+<p><strong>Knowledge distillation</strong> is the idea of training a small "student" model to mimic a large "teacher." Instead of learning only from the hard labels, the student is trained to match the teacher's full output distribution (the soft probabilities). Those soft targets carry the teacher's "dark knowledge" — how it spreads probability across classes — so the student learns a richer signal than the labels alone, and ends up much smaller and cheaper while keeping most of the quality.</p>
+<p><strong>DistilBERT</strong> applies exactly this to BERT. It roughly halves the number of layers and is trained with a distillation loss against BERT (plus the MLM loss), dropping the NSP objective. The result is about 40% smaller and 60% faster while retaining roughly 97% of BERT's performance — a great default when latency and cost matter.</p>
+<p><strong>RoBERTa</strong> (Robustly optimised BERT approach) keeps BERT's architecture but trains it far better: more data, longer training, bigger batches, dynamic masking (the masked tokens change across epochs), and dropping NSP entirely. The headline lesson is that the original BERT was simply undertrained — RoBERTa beats it without changing the architecture at all.</p>
+
+<h3>Sources</h3>
+<p><a href="https://www.youtube.com/watch?v=Q5baLehv5So">CME295 · Lecture 2 (YouTube)</a></p>
+
+<p><a href="../notes.html">← Back to Notes</a></p>
+</article>
+
+<footer>
+  <span class="social">
+    <a href="mailto:ojas.jain.25072003@gmail.com" aria-label="Email"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" fill="currentColor"/></svg></a>
+    <a href="https://github.com/MaximusStupidus" aria-label="GitHub"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.014 2.898-.014 3.293 0 .322.216.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="currentColor"/></svg></a>
+    <a href="https://x.com/ozzajj" aria-label="X"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" fill="currentColor"/></svg></a>
+    <a href="https://www.linkedin.com/in/ojas-jain-iit" aria-label="LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z" fill="currentColor"/></svg></a>
+  </span>
+  <span class="visits" hidden><span class="visits-count"></span> visits</span>
+</footer>
+
+<script>
+fetch('https://ojas-visit-counter.ojas-lucifer.workers.dev/')
+  .then(function (r) { return r.json(); })
+  .then(function (d) {
+    var el = document.querySelector('.visits');
+    if (!el) return;
+    el.querySelector('.visits-count').textContent = d.count;
+    el.hidden = false;
+  })
+  .catch(function () {});
+</script>
+
+</body>
+</html>
