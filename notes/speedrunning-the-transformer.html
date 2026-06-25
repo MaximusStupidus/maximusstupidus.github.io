@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Speedrunning the Transformer — Ojas Jain</title>
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css?v=3">
+</head>
+<body>
+
+<nav class="nav">
+<a href="../index.html">Home</a><a href="../projects.html">Projects</a><a href="../cv.html">CV</a><a href="../writings.html">Writings</a><a href="../reading.html">Reading</a><a href="../quotes.html">Quotes</a><a href="../puzzles.html">Puzzles</a><a href="../contact.html">Contact</a>
+</nav>
+
+<article>
+<h1>Speedrunning the Transformer</h1>
+<p class="post-date">June 25, 2026 · CME295, Lecture 1: The Transformer</p>
+
+<p>During undergraduate college, I loved taking lectures on random courses — probability theory, poker — and I always thought of continuing the habit. But the humdrum of starting up really took me far from that environment I loved being in. Serendipitously, I'm now building in the field of AI, and I'd been postponing CME295 for quite some time. Well, better late than never — let's do a speedrun of the entire course.</p>
+
+<h2>Lecture 1: The Transformer</h2>
+
+<h3>00:00–10:50 · Course logistics</h3>
+<p>Skippable if you're not taking the course online, but it's fun to see how Stanford structures their logistics. The lecturer emphasized that attending class in person is "essentially a personal choice," and mentioned the recordings serve as material you can watch flexibly, which I think is super good. At my college, attendance was a huge issue, and some very venerable professors would even fail students who didn't meet their expected attendance criteria via the infamous "DX" grade. I personally think this discourages students' attitude towards research, which could be done in those class hours, and by not letting students decide for themselves, the institution treats them as kids — or much worse, prisoners. Very uniquely Indian, I must say. Anyway, let's get back to learning.</p>
+
+<h3>10:50–14:15 · Natural Language Processing</h3>
+<p>NLP stands for Natural Language Processing (:p).</p>
+<p>The professor describes NLP as a field that revolves around "manipulating text," and it can be classified into 3 buckets: classification, multi-classification &amp; generation, in increasing order of interest in today's AI landscape.</p>
+<p>Briefly, classification deals with sentiment extraction, intent detection, language detection &amp; topic modelling.</p>
+<ul>
+  <li><strong>Sentiment extraction</strong> is judging a chunk of text as positive, negative or neutral.</li>
+  <li><strong>Intent detection</strong> is judging the action from the text (the professor's example: "I want to create an alarm for tomorrow" → here the intent is to create an alarm).</li>
+  <li><strong>Language detection</strong> is judging the language from the text, and this brings an important application in today's speech-to-text models, which natively understand language thanks to the vast amount of data captured in their training runs. But language detection is still useful in multilingual scenarios, especially in voice agents, to make sure the speaker's language is recognised by the model properly.</li>
+  <li><strong>Topic detection</strong> identifies the main themes or topics within a large chunk of text without reading things manually. (And since it's text, this also applies to audio — and forgive me for being too extrapolatory, but video as well.)</li>
+</ul>
+<p><strong>Multiclassification</strong> takes text as input and predicts multiple things. Examples are NER (named entity recognition), which labels specific words (location, time, etc.). Then there are some more linguistic tasks (a bit archaic in today's landscape): speech tagging (figuring out nouns, pronouns, etc.), dependency parsing, constituency parsing.</p>
+<p><strong>Generation</strong> (the most popular one by far) is basically text as input and text as output with variable length. There are sub-fields like Machine Translation, Question Answering (ChatGPT, Gemini, etc.), Summarization and Text Generation. Basically, the trillion-dollar AI industry is this.</p>
+
+<h3>14:15–16:45 · Sentiment Extraction in Classification</h3>
+<p>The usual datasets for this are found on X, Amazon Reviews or IMDB critiques. There are 4 evals to keep in mind: Accuracy, Precision, Recall &amp; F1 score. Accuracy is the % of observations correctly predicted; precision is the % of predicted-positive that were correct; recall is the % of actually-positive that were correct; and F1 score is a function of precision and recall.</p>
+<p>There's an interesting nuance here about these 4 evals. Sometimes there are tasks and datasets where classes are very imbalanced (e.g. 99% of the dataset is positively labelled). In these imbalanced datasets, accuracy on its own is a poor judge of quality, because a classifier that predicts everything as positive can win over others but won't be useful in real life. Hence, precision &amp; recall play a big role.</p>
+
+<h3>16:45–17:50 · NER (Multiclassification)</h3>
+<p>This helps identify the category of a given word. The dataset used is the Annotated Reuters Newspaper (CoNLL-2003, CoNLL++). The evals are again accuracy, precision, recall and F1 score. The nuance here is that these metrics are used at a token level or entity-type level rather than an aggregate sentence level.</p>
+
+<h3>17:50 · Machine Translation (Generation)</h3>
+<p>This helps translate text between 2 languages (what EzDubs AI did). The datasets used are found in the Workshop for Machine Translation (WMT datasets). The evals are BLEU, ROUGE &amp; Perplexity. BLEU (BiLingual Evaluation Understudy) helps judge the quality of translated text and is a measure of how well a translation stands with respect to a reference text (similar to precision); ROUGE helps with the quality of text generated (similar to recall); and perplexity quantifies how "surprised" the model is to see some words together.</p>
+<p>The problem with BLEU &amp; ROUGE is that you'll always need reference text to judge things. With recent progress in the LLM space, more reference-free metrics have come up, which we'll discuss later in the course.</p>
+<p><strong>Note —</strong> the timeline of recent LLMs traces back to the 1980s: from RNNs (1980s), to LSTMs (1997), word2vec (2013), transformers (2017) and LLMs (2020).</p>
+
+<h3>23:00 · Tokenization</h3>
+<p>It's basically cutting text into some arbitrary unit of text. This arbitrary unit is called a "token."</p>
+<p>The reason we don't do word-level tokenization is that "bear" and "bears," which should be similar, get treated differently. It's simple &amp; interpretable, but has the risk of being OOV (out of vocabulary).</p>
+<p>Sub-word tokenizers (WordPiece, BPE) leverage roots of words (-dy, -ing) to counter this problem, but the con is that the sequence gets longer, which increases the complexity of the models, as they depend directly on the number of tokens that need to be processed. Lower risk of OOV.</p>
+<p>Character-level tokenizers have a small chance of OOV, but make computations slower and the embeddings are not interpretable. They are also robust to casing and misspellings.</p>
+<p><strong>WTF is OOV —</strong> at inference time, when we want to make a prediction, the token that needs to be predicted must be in the training set. If at inference time it isn't, it'll be marked as unknown, a.k.a. OOV.</p>
+
+<h3>30:40 · Word Representation</h3>
+<p>The aim is to find a representation for each of these tokens. The naive way is to assign it via OHE (one-hot encoding). But people want to compare these tokens to see which ones are similar, via cosine similarity, by looking at the angles made between these vectors in the n-dimensional space. With OHE, all vectors will be orthogonal to one another, so we need some form of a "learned embedding."</p>
+<p><strong>Note —</strong> the vocabulary for a modern multimodal LLM could be on the order of 100,000s.</p>
+<p>We need to learn these embeddings from data. Here is where word2vec comes in. It shows a very intuitive way of learning these embeddings and making sense of them. It uses 2 approaches: CBOW (Continuous Bag of Words) &amp; Skip-Gram. It's basically used to learn this embedding layer, and is a neural network with a proxy task over billions of words worth of text. CBOW is essentially predicting the target word if you have the words surrounding it, and Skip-Gram is the opposite (target word → words around it). These are the proxy tasks. It's not necessary to predict the next word yet, but rather to learn the meanings of these words in this high-dimensional space, to ensure the model has an understanding of the language. (For example, King &amp; Queen have the same similarity as Husband &amp; Wife.)</p>
+<p><strong>Note —</strong> epoch → how many times the model sees the training set.</p>
+<p><strong>Some nice questions:</strong></p>
+<ul>
+  <li>How do you know when generation stops? → Using end-of-sequence tokens, usually.</li>
+  <li>What informs the size of the hidden layer? → It's a tradeoff. We want the embedding to be rich enough to be informative for downstream tasks, but for smaller tasks, smaller vectors might be better, as longer vectors imply longer computation.</li>
+  <li>How can we distinguish words spelled the same but in different contexts? → Basically what LLMs are.</li>
+</ul>
+<p>An important concept captured here: to make this "learned embedding," one uses sample text itself, and from these billions of words the embeddings are learnt. Any new word is basically one-hot encoded, passed onto the hidden layer of this learned embedding, and that is what becomes the "word representation" used.</p>
+
+<h3>53:25 · Recurrent Neural Networks</h3>
+<p>RNNs capture the sequential nature of how text appears in the real world. Instead of processing words all at once, they keep a hidden representation of the sentence so far and consider tokens one at a time. This technique was introduced in the 80s.</p>
+<figure class="diagram">
+  <img class="shot" src="../images/note-rnn.png" alt="An unrolled RNN predicting the next token one step at a time: A to cute, cute to teddy bear, teddy bear to is, is to reading">
+  <figcaption>An unrolled RNN: each cell predicts the next token from the previous one.</figcaption>
+</figure>
+<p>Why do we not hear of RNNs these days? They had some pros, but a lot of cons. The meaning of a sentence is only captured in the hidden state, which creates problems with long-range dependencies and impacts the model's ability to remember what it saw in the past.</p>
+
+<h3>01:00:05 · LSTMs</h3>
+<p>Stands for Long Short-Term Memory. In order to predict the next token, we depend on every word appearing before it. In practice, sometimes there can be a vanishing gradient problem.</p>
+<p><strong>Note —</strong> read about the vanishing gradient problem properly: <a href="https://en.wikipedia.org/wiki/Vanishing_gradient_problem">Wikipedia</a>.</p>
+<p>To recap: word2vec is simple yet powerful &amp; has very intuitive embeddings, but word order doesn't count and the embeddings aren't context-aware. RNNs &amp; LSTMs have state-of-the-art results and word order matters, but the vanishing gradient problem is there and computations are relatively slow.</p>
+
+<h3>01:05:00 · Attention</h3>
+<p>The model has trouble remembering things in the past. The translation tasks had a real issue with long-term dependencies, and seq2seq models were unable to remember what the input sentence was saying.</p>
+<p>Hence, "attention" was born in 2014 to solve these long-range dependency issues.</p>
+
+<h3>01:06:56 · Self-Attention mechanism</h3>
+<p>Introduced in 2017 in <em>Attention Is All You Need</em> (infamous, haha). It relies on the self-attention mechanism and leads to SOTA results on machine-translation tasks.</p>
+<p>The core idea of self-attention is very basic: to infer the context of any token in a sentence, look at all the tokens surrounding it. That's literally it.</p>
+<p>Here is where Q, K and V come in — the Query, Key &amp; Value vectors. The Query is compared to the Key, which then takes the corresponding Value.</p>
+<p>The efficient computation happens over GPUs and is expressed as <span class="fml">softmax(QK<sup>T</sup> / √d<sub>k</sub>) · V</span>.</p>
+<figure class="diagram">
+  <img class="shot" src="../images/note-qkv-caching.png" alt="The QK^T V attention computation with K and V cached between the prefill and decode steps">
+  <figcaption>The QK<sup>T</sup>V attention computation, with K and V cached across decode steps.</figcaption>
+</figure>
+
+<h3>01:14:00 · Transformer Architecture</h3>
+<p>It's based on an encoder-decoder architecture. The encoder computes meaningful embeddings of your input text, and the self-attention mechanism applies this at the attention layer — all the tokens in the input text attend to one another.</p>
+<p>Notes are available for this (not from this lecture, but generally very useful): <a href="https://docs.google.com/document/d/1H1RiRQsx7kKGE6dXeHXgUelvG30V_OUshgKbCNtBWfA/edit?usp=sharing">Google Doc</a>.</p>
+<p><strong>Note —</strong> position encodings inform the positional information in this transformer architecture to supplement the attention mechanism, since attention is position-agnostic.</p>
+
+<h3>01:24:38 · Multi-head attention</h3>
+<p>The broad idea is to run multiple self-attention layers in parallel. The benefit is obvious, as it enables the model to capture different attention features in parallel. As a comparison, think of the multiple filters of a convolutional layer in CV.</p>
+
+<h3>01:25:40 · Label Smoothing (a computation trick)</h3>
+<p>Overconfidence is bad. Label smoothing intuitively addresses this by saying "predict this word, but it might be that it's not this word," deliberately introducing noise into the true labels.</p>
+<p class="fml">q(k|x) = δ<sub>k,y</sub> &nbsp;→&nbsp; q′(k|x) = (1 − ε)·δ<sub>k,y</sub> + ε·u(k)</p>
+<p>It tends to make the model less sure about its prediction, hence preventing overfitting, and in practice it improves BLEU score for translation tasks and accuracy.</p>
+
+<h3>01:27:50 · An end-to-end example</h3>
+<p>"A cute teddy bear is reading." → convert to French.</p>
+<p>Tokens: BOS, A, cute, teddy bear, is, reading, . , EOS.</p>
+<p>Convert these into position-aware embeddings. Then pass them through the encoder. Project them into Query/Key/Value space by multiplying by the Query, Key &amp; Value weight matrices to form the Query, Key &amp; Value vectors, and using the self-attention formula, compute the matrix. Finally, there's an FFN at the end of the encoder that makes context-aware encoded embeddings. There are basically N encoder modules (big N in the original paper). These N are now fed to N decoders, and the last representation of the encoder is fed to the cross-attention of each decoder.</p>
+<p><strong>Note —</strong> the hidden layer usually has a smaller dimension than the input or output, but here it's bigger, because we want the model to have enough degrees of freedom to learn useful representations.</p>
+
+<p>The lecture ended with "Thank you for your attention." Haha.</p>
+
+<p><a href="../notes.html">← Back to Notes</a></p>
+</article>
+
+<footer>
+  <span class="social">
+    <a href="mailto:ojas.jain.25072003@gmail.com" aria-label="Email"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" fill="currentColor"/></svg></a>
+    <a href="https://github.com/MaximusStupidus" aria-label="GitHub"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.606-.014 2.898-.014 3.293 0 .322.216.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" fill="currentColor"/></svg></a>
+    <a href="https://x.com/ozzajj" aria-label="X"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" fill="currentColor"/></svg></a>
+    <a href="https://www.linkedin.com/in/ojas-jain-iit" aria-label="LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z" fill="currentColor"/></svg></a>
+  </span>
+  <span class="visits" hidden><span class="visits-count"></span> visits</span>
+</footer>
+
+<script>
+fetch('https://ojas-visit-counter.ojas-lucifer.workers.dev/')
+  .then(function (r) { return r.json(); })
+  .then(function (d) {
+    var el = document.querySelector('.visits');
+    if (!el) return;
+    el.querySelector('.visits-count').textContent = d.count;
+    el.hidden = false;
+  })
+  .catch(function () {});
+</script>
+
+</body>
+</html>
