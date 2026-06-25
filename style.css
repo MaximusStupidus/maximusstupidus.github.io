@@ -119,6 +119,10 @@ p, li, h1, h2, h3, blockquote, .fml { overflow-wrap: break-word; }
   footer { padding-top: 22px; }
 }
 
+/* Poems */
+.poem { line-height: 1.65; }
+.poem p { margin: 0 0 20px; }
+
 /* Blog post body: a little more breathing room */
 article p { margin: 0 0 18px; }
 article h1 { margin-bottom: 4px; }
